@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RalphWang – Permission-Gated Screen Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            min-height: 100vh;
+        }
+
+        .panel {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .instruction-zone {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .instruction-zone h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            color: #e0e0e0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 12px;
+        }
+
+        textarea::placeholder {
+            color: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00b8d4;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a3a;
+        }
+
+        .permission-request {
+            background: #1a2a2a;
+            border: 2px solid #00d9ff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .permission-request h3 {
+            color: #00d9ff;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .permission-details {
+            background: #0f1a1a;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #b0b0b0;
+        }
+
+        .permission-details strong {
+            color: #e0e0e0;
+        }
+
+        .permission-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-approve, .btn-deny {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-approve {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        .btn-approve:hover {
+            background: #00b8d4;
+        }
+
+        .btn-deny {
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .btn-deny:hover {
+            background: #3a3a3a;
+        }
+
+        .output-zone {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #7f8f8f;
+            margin-bottom: 12px;
+        }
+
+        .output-zone.active {
+            border-color: #00d9ff;
+            background: #0f1a1a;
+            color: #00d9ff;
+        }
+
+        .output-line {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+cat > public/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RalphWang – Permission-Gated Screen Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            min-height: 100vh;
+        }
+
+        .panel {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .instruction-zone {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .instruction-zone h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            color: #e0e0e0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 12px;
+        }
+
+        textarea::placeholder {
+            color: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00b8d4;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a3a;
+        }
+
+        .permission-request {
+            background: #1a2a2a;
+            border: 2px solid #00d9ff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .permission-request h3 {
+            color: #00d9ff;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .permission-details {
+            background: #0f1a1a;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #b0b0b0;
+        }
+
+        .permission-details strong {
+            color: #e0e0e0;
+        }
+
+        .permission-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-approve, .btn-deny {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-approve {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        .btn-approve:hover {
+            background: #00b8d4;
+        }
+
+        .btn-deny {
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .btn-deny:hover {
+            background: #3a3a3a;
+        }
+
+        .output-zone {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #7f8f8f;
+            margin-bottom: 12px;
+        }
+
+        .output-zone.active {
+            border-color: #00d9ff;
+            background: #0f1a1a;
+            color: #00d9ff;
+        }
+
+        .output-line {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .log-success {
+            color: #00d9ff;
+        }
+
+        .log-warning {
+            color: #ffaa00;
+        }
+
+        .log-error {
+            color: #ff3333;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-idle {
+            background: #666;
+            animation: none;
+        }
+
+        .status-listening {
+            background: #00d9ff;
+        }
+
+        .status-processing {
+            background: #ffaa00;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .info-box {
+            background: #1a2a1a;
+            border: 1px solid #2a4a2a;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 13px;
+            color: #9d9d9d;
+            margin-top: 12px;
+        }
+
+        .info-box strong {
+            color: #a8d5a8;
+        }
+
+        .tabs-result {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .tabs-result h4 {
+            color: #00d9ff;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .tab-item {
+            background: #1a1a1a;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 2px solid #00d9ff;
+            font-size: 12px;
+        }
+
+        .tab-title {
+            color: #e0e0e0;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tab-url {
+            color: #666;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .copy-btn {
+            background: #333;
+            color: #00d9ff;
+            border: 1px solid #444;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #3a3a3a;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <div>
+                <h1>RalphWang</h1>
+                <p class="subtitle">Permission-gated screen access. Only looks when you ask, where you ask, for what you ask.</p>
+            </div>
+
+            <div class="instruction-zone">
+                <h3>📋 What do you need?</h3>
+                <textarea id="userRequest" placeholder="e.g., 'Look at my Chrome browser and list all open tab URLs'"></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="initiateScreenAccess()">Request Screen Access</button>
+                <button class="btn-secondary" onclick="clearLog()">Clear Log</button>
+            </div>
+
+            <div id="permissionRequest" style="display: none;">
+                <div class="permission-request">
+                    <h3>⚠️ Permission Request</h3>
+                    <div class="permission-details">
+                        <strong>Your Request:</strong><br>
+                        <span id="requestSummary"></span>
+                        <br><br>
+                        <strong>Agent will:</strong><br>
+                        <span id="actionSummary"></span>
+                        <br><br>
+                        <strong>Scope:</strong> Limited to requested action only<br>
+                        <strong>Access revocation:</strong> Immediate after completion
+                    </div>
+                    <div class="permission-buttons">
+                        <button class="btn-approve" onclick="approveAccess()">✓ Grant Access</button>
+                        <button class="btn-deny" onclick="denyAccess()">✗ Deny</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>🔒 RalphWang Security Model:</strong><br>
+                • No persistent access<br>
+                • No background monitoring<br>
+                • Permission required per request<br>
+                • Immediate revocation after use<br>
+                • Scope-limited to your request
+            </div>
+        </div>
+
+        <div class="panel">
+            <div>
+                <h1>RalphWang Status</h1>
+                <p class="subtitle"><span class="status-indicator status-idle" id="statusIndicator"></span><span id="status">Idle, awaiting instruction</span></p>
+            </div>
+
+            <div class="output-zone" id="outputLog">
+                <div class="output-line log-warning">// RalphWang initialized</div>
+                <div class="output-line log-warning">// Awaiting your instruction</div>
+            </div>
+
+            <div id="tabsResultArea" style="display: none;">
+                <div class="tabs-result">
+                    <h4>📑 Captured Tabs</h4>
+                    <div id="tabsList"></div>
+                    <button class="copy-btn" onclick="copyTabsToClipboard()">📋 Copy All URLs</button>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>✓ What RalphWang does:</strong><br>
+                • Captures only when you grant permission<br>
+                • Shows exactly what it captured<br>
+                • Processes your request immediately<br>
+                • Revokes access automatically
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let accessGranted = false;
+        let currentRequest = "";
+        let capturedTabs = [];
+
+        function log(message, type = 'normal') {
+            const outputLog = document.getElementById('outputLog');
+            const line = document.createElement('div');
+            line.className = 'output-line';
+            
+            if (type === 'success') line.className += ' log-success';
+            if (type === 'warning') line.className += ' log-warning';
+            if (type === 'error') line.className += ' log-error';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            
+            outputLog.appendChild(line);
+            outputLog.scrollTop = outputLog.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('outputLog').innerHTML = '';
+            log('// Log cleared', 'warning');
+        }
+
+        function updateStatus(status, indicator) {
+            document.getElementById('status').textContent = status;
+            const statusEl = document.getElementById('statusIndicator');
+            statusEl.className = `status-indicator ${indicator}`;
+        }
+
+        function initiateScreenAccess() {
+            currentRequest = document.getElementById('userRequest').value.trim();
+            
+            if (!currentRequest) {
+                log('⚠️ Please describe what you need', 'error');
+                return;
+            }
+
+            log('→ Permission request initiated', 'normal');
+            
+            document.getElementById('requestSummary').textContent = currentRequest;
+            document.getElementById('actionSummary').textContent = 'Capture Chrome browser tabs and extract all URLs';
+            document.getElementById('permissionRequest').style.display = 'block';
+            
+            updateStatus('Awaiting your approval...', 'listening');
+        }
+
+        function approveAccess() {
+            accessGranted = true;
+            log('✓ Access granted by user', 'success');
+            document.getElementById('permissionRequest').style.display = 'none';
+            
+            updateStatus('Processing screen capture...', 'processing');
+            
+            setTimeout(() => {
+                captureAndProcess();
+            }, 800);
+        }
+
+        function denyAccess() {
+            log('✗ Access denied by user', 'error');
+            document.getElementById('permissionRequest').style.display = 'none';
+            accessGranted = false;
+            updateStatus('Idle, awaiting instruction', 'idle');
+        }
+
+        function captureAndProcess() {
+            log('📸 Capturing Chrome tabs...', 'normal');
+            
+            fetch('/api/approve-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request: currentRequest })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    log(`⚠️ ${data.error}`, 'warning');
+                    if (data.instruction) {
+                        log(`💡 ${data.instruction}`, 'warning');
+                    }
+                } else if (data.result.tabs) {
+                    capturedTabs = data.result.tabs;
+                    log(`✓ Captured ${capturedTabs.length} tabs`, 'success');
+                    
+                    capturedTabs.forEach((tab, i) => {
+                        log(`  ${i + 1}. ${tab.title}`, 'normal');
+                    });
+                    
+                    displayTabsResult();
+                }
+                
+                log('✓ Access revoked immediately', 'success');
+                updateStatus('Idle, awaiting instruction', 'idle');
+                accessGranted = false;
+            })
+            .catch(err => {
+                log(`❌ Error: ${err.message}`, 'error');
+                log('Make sure the server is running (npm start)', 'error');
+                updateStatus('Idle, awaiting instruction', 'idle');
+                accessGranted = false;
+            });
+        }
+
+        function displayTabsResult() {
+            const resultArea = document.getElementById('tabsResultArea');
+            const tabsList = document.getElementById('tabsList');
+            
+            tabsList.innerHTML = '';
+            capturedTabs.forEach((tab, i) => {
+                const tabEl = document.createElement('div');
+                tabEl.className = 'tab-item';
+                tabEl.innerHTML = `
+                    <div class="tab-title">${i + 1}. ${tab.title}</div>
+                    <div class="tab-url">${tab.url}</div>
+                `;
+                tabsList.appendChild(tabEl);
+            });
+            
+            resultArea.style.display = 'block';
+        }
+
+        function copyTabsToClipboard() {
+            const urls = capturedTabs.map(tab => tab.url).join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                log('✓ All URLs copied to clipboard', 'success');
+            }).catch(() => {
+                log('❌ Failed to copy to clipboard', 'error');
+            });
+        }
+
+        updateStatus('Idle, awaiting instruction', 'idle');
+    </script>
+</body>
+</html>
