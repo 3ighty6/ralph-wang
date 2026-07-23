@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents Directory – 80+ Curated Agents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00d9ff, #00b8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 24px;
+        }
+
+        .controls {
+            max-width: 1400px;
+            margin: 0 auto 32px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        input[type="text"]::placeholder {
+            color: #555;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #00d9ff;
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .tag-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tag-btn {
+            padding: 8px 16px;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 20px;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .tag-btn.active {
+            background: #00d9ff;
+            color: #000;
+            border-color: #00d9ff;
+        }
+
+        .results-info {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .agent-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .agent-card:hover {
+            border-color: #00d9ff;
+            box-shadow: 0 8px 24px rgba(0, 217, 255, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agent-icon {
+            font-size: 32px;
+            min-width: 40px;
+        }
+
+        .agent-title {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .agent-category {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .agent-desc {
+            font-size: 13px;
+            color: #b0b0b0;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .agent-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #252525;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #888;
+            border: 1px solid #333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .modal-category {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .modal-section-content {
+            font-size: 14px;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        .modal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .modal-tag {
+            display: inline-block;
+            background: #252525;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #333;
+            color: #888;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI Agents Directory</h1>
+        <p class="subtitle">80+ curated AI agents from Claude, Kimi, GitHub, and community projects</p>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search agents by name or description..." onkeyup="filterAgents()">
+        </div>
+        <div class="tag-filters" id="tagFilters"></div>
+    </div>
+
+    <div class="results-info">
+        Showing <span id="resultCount">0</span> of <span id="totalCount">0</span> agents
+    </div>
+
+    <div class="grid" id="agentGrid"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const agents = [
+            // Claude App Agents
+            {
+                id: 1,
+                name: "Document Analyzer",
+                icon: "📄",
+                category: "Claude App",
+                desc: "Analyzes documents, extracts key information, and summarizes content",
+                bestFor: "Document analysis, research, content summarization",
+                tags: ["document", "analysis", "research"]
+            },
+            {
+                id: 2,
+                name: "Code Assistant",
+                icon: "💻",
+                category: "Claude App",
+                desc: "Helps with code generation, debugging, and programming tasks",
+                bestFor: "Software development, debugging, code review",
+                tags: ["coding", "development", "debugging"]
+            },
+            {
+                id: 3,
+                name: "Research Agent",
+                icon: "🔍",
+                category: "Claude App",
+                desc: "Conducts research and gathers information from multiple sources",
+                bestFor: "Research, information gathering, analysis",
+                tags: ["research", "analysis", "information"]
+            },
+            {
+                id: 4,
+                name: "Creative Writer",
+                icon: "✍️",
+                category: "Claude App",
+                desc: "Generates creative content, stories, and marketing copy",
+                bestFor: "Content creation, copywriting, storytelling",
+                tags: ["creative", "writing", "content"]
+            },
+            {
+                id: 5,
+                name: "Data Analyst",
+                icon: "📊",
+                category: "Claude App",
+                desc: "Analyzes datasets and creates data visualizations",
+                bestFor: "Data analysis, visualization, reporting",
+                tags: ["data", "analysis", "visualization"]
+            },
+            {
+                id: 6,
+                name: "Customer Support",
+                icon: "🎧",
+                category: "Claude App",
+                desc: "Handles customer inquiries and provides support",
+                bestFor: "Customer service, support, FAQ",
+                tags: ["support", "customer-service", "help"]
+            },
+            {
+                id: 7,
+                name: "Project Manager",
+                icon: "📋",
+                category: "Claude App",
+                desc: "Organizes tasks, tracks progress, and manages projects",
+                bestFor: "Project management, task tracking, team coordination",
+                tags: ["project-management", "planning", "tracking"]
+            },
+            {
+                id: 8,
+                name: "Content Creator",
+                icon: "🎬",
+                category: "Claude App",
+                desc: "Creates multimedia content and manages content strategy",
+                bestFor: "Content production, social media, marketing",
+                tags: ["content", "marketing", "social-media"]
+            },
+            {
+                id: 9,
+                name: "Learning Assistant",
+                icon: "📚",
+                category: "Claude App",
+                desc: "Assists with learning, tutoring, and educational content",
+                bestFor: "Education, tutoring, skill development",
+                tags: ["education", "learning", "tutoring"]
+            },
+            {
+                id: 10,
+                name: "Business Advisor",
+                icon: "💼",
+                category: "Claude App",
+                desc: "Provides business strategy, planning, and consulting",
+                bestFor: "Business strategy, consulting, planning",
+                tags: ["business", "strategy", "consulting"]
+            },
+            // GitHub Repos - New Agents
+            {
+                id: 41,
+                name: "OpenCLI",
+                icon: "⌨️",
+                category: "GitHub Project",
+                desc: "CLI tool for AI-powered command execution and automation",
+                bestFor: "Command-line automation, DevOps, scripting",
+                tags: ["cli", "automation", "devops"]
+            },
+            {
+                id: 42,
+                name: "Anthropic Cybersecurity Skills",
+                icon: "🔒",
+                category: "GitHub Project",
+                desc: "Cybersecurity-focused AI agent and skill modules",
+                bestFor: "Security analysis, vulnerability assessment, threat detection",
+                tags: ["security", "cybersecurity", "threat-detection"]
+            },
+            {
+                id: 43,
+                name: "9router",
+                icon: "🌐",
+                category: "GitHub Project",
+                desc: "AI router for intelligent request routing and load balancing",
+                bestFor: "API routing, load balancing, microservices",
+                tags: ["routing", "api", "infrastructure"]
+            },
+            {
+                id: 44,
+                name: "Hermes WebUI",
+                icon: "🕸️",
+                category: "GitHub Project",
+                desc: "Web interface for Hermes agent framework",
+                bestFor: "Agent management, monitoring, UI interface",
+                tags: ["web-ui", "agent-framework", "management"]
+            },
+            {
+                id: 45,
+                name: "Julep",
+                icon: "⚙️",
+                category: "GitHub Project",
+                desc: "Open-source agent framework with advanced capabilities",
+                bestFor: "Agent development, orchestration, deployment",
+                tags: ["agent-framework", "orchestration", "development"]
+            },
+            {
+                id: 46,
+                name: "Awesome Free LLM APIs",
+                icon: "📡",
+                category: "GitHub Project",
+                desc: "Curated list of free and open LLM API endpoints",
+                bestFor: "LLM integration, API discovery, cost-effective solutions",
+                tags: ["api", "llm", "open-source"]
+            },
+            {
+                id: 47,
+                name: "n8n Skills",
+                icon: "🔗",
+                category: "GitHub Project",
+                desc: "Custom skills and integrations for n8n workflow automation",
+                bestFor: "Workflow automation, n8n integration, task automation",
+                tags: ["automation", "workflow", "n8n"]
+            },
+            {
+                id: 48,
+                name: "Destructive Command Guard",
+                icon: "⛔",
+                category: "GitHub Project",
+                desc: "Safety layer to prevent destructive operations in AI agents",
+                bestFor: "Safety, protection, command validation",
+                tags: ["safety", "protection", "security"]
+            },
+            {
+                id: 49,
+                name: "CyberStrikeAI",
+                icon: "🎯",
+                category: "GitHub Project",
+                desc: "AI-powered cybersecurity offensive and defensive tool",
+                bestFor: "Penetration testing, security research, threat analysis",
+                tags: ["security", "penetration-testing", "research"]
+            },
+            {
+                id: 50,
+                name: "Thunderbolt",
+                icon: "⚡",
+                category: "GitHub Project",
+                desc: "High-performance agent framework for real-time processing",
+                bestFor: "Real-time systems, high-performance computing, streaming",
+                tags: ["performance", "real-time", "streaming"]
+            },
+            {
+                id: 51,
+                name: "Liveblocks",
+                icon: "🤝",
+                category: "GitHub Project",
+                desc: "Real-time collaboration infrastructure for AI agents",
+                bestFor: "Collaborative AI, real-time sync, multi-agent systems",
+                tags: ["collaboration", "real-time", "multi-agent"]
+            },
+            {
+                id: 52,
+                name: "Generative Media Skills",
+                icon: "🎨",
+                category: "GitHub Project",
+                desc: "AI agent skills for generating images, video, and multimedia",
+                bestFor: "Content generation, media creation, design automation",
+                tags: ["media-generation", "creative", "design"]
+            },
+            {
+                id: 53,
+                name: "Mirage",
+                icon: "✨",
+                category: "GitHub Project",
+                desc: "Agent framework for building sophisticated AI applications",
+                bestFor: "Complex agent systems, application development, orchestration",
+                tags: ["agent-framework", "development", "orchestration"]
+            },
+            {
+                id: 54,
+                name: "Maestro",
+                icon: "🎼",
+                category: "GitHub Project",
+                desc: "Orchestration framework for coordinating multiple AI agents",
+                bestFor: "Multi-agent orchestration, task coordination, workflow management",
+                tags: ["orchestration", "coordination", "workflow"]
+            },
+            {
+                id: 55,
+                name: "AI Crawler",
+                icon: "🕷️",
+                category: "GitHub Project",
+                desc: "Intelligent web crawling and data extraction with AI",
+                bestFor: "Web scraping, data extraction, information gathering",
+                tags: ["web-scraping", "data-extraction", "crawling"]
+            },
+            {
+                id: 56,
+                name: "Ralph Orchestrator",
+                icon: "🎭",
+                category: "GitHub Project",
+                desc: "Orchestration tool for managing complex agent workflows",
+                bestFor: "Workflow orchestration, task management, automation",
+                tags: ["orchestration", "workflow", "automation"]
+            },
+            {
+                id: 57,
+                name: "README AI",
+                icon: "📖",
+                category: "GitHub Project",
+                desc: "AI-powered README generation for GitHub projects",
+                bestFor: "Documentation, README generation, project description",
+                tags: ["documentation", "generation", "github"]
+            },
+            {
+                id: 58,
+                name: "Open WebUI Terminal",
+                icon: "💬",
+                category: "GitHub Project",
+                desc: "Open-source web UI with terminal capabilities for AI agents",
+                bestFor: "Web interface, terminal access, agent interaction",
+                tags: ["web-ui", "terminal", "interface"]
+            },
+            {
+                id: 59,
+                name: "Pro Workflow",
+                icon: "⚙️",
+                category: "GitHub Project",
+                desc: "Professional workflow automation framework",
+                bestFor: "Enterprise automation, workflow design, process management",
+                tags: ["automation", "workflow", "enterprise"]
+            },
+            {
+                id: 60,
+                name: "hCaptcha Challenger",
+                icon: "🔐",
+                category: "GitHub Project",
+                desc: "AI solution for hCaptcha solving and verification",
+                bestFor: "CAPTCHA solving, verification, automation",
+                tags: ["captcha", "automation", "security"]
+            },
+            {
+                id: 61,
+                name: "Supabase Agent Skills",
+                icon: "🗄️",
+                category: "GitHub Project",
+                desc: "Pre-built skills for Supabase integration with AI agents",
+                bestFor: "Database integration, Supabase, backend automation",
+                tags: ["database", "supabase", "integration"]
+            },
+            {
+                id: 62,
+                name: "Webclaw",
+                icon: "🦀",
+                category: "GitHub Project",
+                desc: "Web crawling agent with advanced feature extraction",
+                bestFor: "Web scraping, content extraction, data gathering",
+                tags: ["web-scraping", "extraction", "crawling"]
+            },
+            {
+                id: 63,
+                name: "AI Creator Academy",
+                icon: "🎓",
+                category: "GitHub Project",
+                desc: "Educational platform and toolkit for AI creator development",
+                bestFor: "Education, training, creator tools",
+                tags: ["education", "training", "learning"]
+            },
+            {
+                id: 64,
+                name: "ADHD Assistant",
+                icon: "🧠",
+                category: "GitHub Project",
+                desc: "Specialized AI agent for ADHD support and task management",
+                bestFor: "Productivity, task management, personal assistance",
+                tags: ["productivity", "assistant", "personal"]
+            },
+            {
+                id: 65,
+                name: "Lumibot",
+                icon: "🤖",
+                category: "GitHub Project",
+                desc: "Trading bot and financial analysis AI agent",
+                bestFor: "Trading, financial analysis, portfolio management",
+                tags: ["trading", "finance", "analysis"]
+            },
+            {
+                id: 66,
+                name: "YouTube Automation Agent",
+                icon: "📹",
+                category: "GitHub Project",
+                desc: "Automates YouTube channel management and content upload",
+                bestFor: "Video automation, channel management, content distribution",
+                tags: ["youtube", "automation", "video"]
+            },
+            {
+                id: 67,
+                name: "Crypto Faucet Autoclaimer",
+                icon: "💰",
+                category: "GitHub Project",
+                desc: "Automated cryptocurrency faucet claiming agent",
+                bestFor: "Crypto automation, reward collection, micro-transactions",
+                tags: ["crypto", "automation", "collection"]
+            },
+            {
+                id: 68,
+                name: "Livybolt Skill",
+                icon: "⚡",
+                category: "GitHub Project",
+                desc: "Skill integration for Livybolt distributed computing",
+                bestFor: "Distributed computing, cluster management, processing",
+                tags: ["distributed", "computing", "integration"]
+            },
+            {
+                id: 69,
+                name: "Cashout Machine",
+                icon: "💸",
+                category: "GitHub Project",
+                desc: "Automated cash flow and payment processing agent",
+                bestFor: "Payment processing, cash management, automation",
+                tags: ["payment", "automation", "finance"]
+            },
+            {
+                id: 70,
+                name: "Ask Clever",
+                icon: "🤔",
+                category: "GitHub Project",
+                desc: "Intelligent question-answering system with reasoning",
+                bestFor: "Q&A, knowledge retrieval, reasoning",
+                tags: ["qa", "reasoning", "knowledge"]
+            },
+            {
+                id: 71,
+                name: "Sweepstakes Tracker",
+                icon: "🎁",
+                category: "GitHub Project",
+                desc: "Tracks and automates sweepstakes entry submissions",
+                bestFor: "Contest automation, sweepstakes, entry management",
+                tags: ["automation", "contests", "tracking"]
+            },
+            {
+                id: 72,
+                name: "SurveyMonkey Autofill",
+                icon: "📝",
+                category: "GitHub Project",
+                desc: "Automates SurveyMonkey survey completion",
+                bestFor: "Survey automation, data collection, form filling",
+                tags: ["automation", "surveys", "forms"]
+            },
+            {
+                id: 73,
+                name: "HGTV Dream Home Autofill",
+                icon: "🏠",
+                category: "GitHub Project",
+                desc: "Automated HGTV Dream Home sweepstakes entry",
+                bestFor: "Contest automation, sweepstakes, entry submission",
+                tags: ["automation", "contests", "sweepstakes"]
+            },
+            {
+                id: 74,
+                name: "Sweepstakes Automator",
+                icon: "🎲",
+                category: "GitHub Project",
+                desc: "General-purpose sweepstakes and contest entry automation",
+                bestFor: "Contest automation, sweepstakes submission, entry tracking",
+                tags: ["automation", "contests", "sweepstakes"]
+            },
+            {
+                id: 75,
+                name: "Stash Vault CLI",
+                icon: "🔑",
+                category: "GitHub Project",
+                desc: "Secure credential and secret management CLI",
+                bestFor: "Credential management, secrets storage, security",
+                tags: ["security", "credentials", "cli"]
+            },
+            {
+                id: 76,
+                name: "Voyarr",
+                icon: "🚀",
+                category: "GitHub Project",
+                desc: "Media server automation and library management agent",
+                bestFor: "Media management, automation, content organization",
+                tags: ["media", "automation", "management"]
+            },
+            {
+                id: 77,
+                name: "Vexnorg Vercel",
+                icon: "🌐",
+                category: "GitHub Project",
+                desc: "Vercel deployment automation and optimization",
+                bestFor: "Deployment, CI/CD, infrastructure management",
+                tags: ["deployment", "devops", "infrastructure"]
+            },
+            // RalphWang & HTML Anything
+            {
+                id: 78,
+                name: "RalphWang",
+                icon: "🖥️",
+                category: "Permission-Gated Agent",
+                desc: "Permission-gated screen access agent. Only looks when you ask, where you ask, for what you ask.",
+                bestFor: "Browser automation, tab extraction, screen capture (permission-based)",
+                tags: ["browser-automation", "permission-gated", "screen-capture"]
+            },
+            {
+                id: 79,
+                name: "HTML Anything",
+                icon: "✨",
+                category: "Design Tool",
+                desc: "Agentic HTML editor with 75 composable skills across 9 surfaces—agent writes HTML, you ship it. Zero API key",
+                bestFor: "Design, HTML generation, web prototypes, magazine articles, presentations",
+                tags: ["html-editor", "design", "local-first", "no-api-key"]
+            },
+            // FanDuel Agent
+            {
+                id: 80,
+                name: "FanDuel Betting Agent",
+                icon: "🎲",
+                category: "Specialized Agent",
+                desc: "Browser-powered agent for FanDuel sportsbook—renders live spreads, odds, props with JavaScript. Analyzes statistical value, detects sharp lines",
+                bestFor: "Sports betting analysis, live odds monitoring, slip construction, statistical edge detection",
+                tags: ["sports-betting", "web-automation", "odds-analysis", "real-time"]
+            }
+        ];
+
+        let filteredAgents = [...agents];
+        let selectedTags = new Set();
+
+        function init() {
+            document.getElementById('totalCount').textContent = agents.length;
+            document.getElementById('resultCount').textContent = agents.length;
+            renderAgents();
+            renderTagFilters();
+        }
+
+        function renderAgents() {
+            const grid = document.getElementById('agentGrid');
+            grid.innerHTML = '';
+
+            if (filteredAgents.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>No agents match your search</p></div>';
+                return;
+            }
+
+            filteredAgents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                card.onclick = () => showModal(agent);
+                card.innerHTML = `
+                    <div class="agent-header">
+                        <div class="agent-icon">${agent.icon}</div>
+                        <div class="agent-title">
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-category">${agent.category}</div>
+                        </div>
+                    </div>
+                    <div class="agent-desc">${agent.desc}</div>
+                    <div class="agent-tags">
+                        ${agent.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderTagFilters() {
+            const allTags = new Set();
+            agents.forEach(agent => agent.tags.forEach(tag => allTags.add(tag)));
+            
+            const filterDiv = document.getElementById('tagFilters');
+            [...allTags].sort().forEach(tag => {
+                const btn = document.createElement('button');
+                btn.className = 'tag-btn';
+                btn.textContent = tag;
+                btn.onclick = () => toggleTag(tag, btn);
+                filterDiv.appendChild(btn);
+            });
+        }
+
+        function toggleTag(tag, btn) {
+            if (selectedTags.has(tag)) {
+                selectedTags.delete(tag);
+                btn.classList.remove('active');
+            } else {
+                selectedTags.add(tag);
+                btn.classList.add('active');
+            }
+            filterAgents();
+        }
+
+        function filterAgents() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredAgents = agents.filter(agent => {
+                const matchesSearch = agent.name.toLowerCase().includes(search) || 
+                                    agent.desc.toLowerCase().includes(search) ||
+                                    agent.tags.some(tag => tag.toLowerCase().includes(search));
+                
+                const matchesTags = selectedTags.size === 0 || 
+                                   agent.tags.some(tag => selectedTags.has(tag));
+                
+                return matchesSearch && matchesTags;
+            });
+
+            document.getElementById('resultCount').textContent = filteredAgents.length;
+            renderAgents();
+        }
+
+        function showModal(agent) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = `
+                <div class="modal-title">${agent.icon} ${agent.name}</div>
+                <div class="modal-category">${agent.category}</div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-title">Description</div>
+                    <div class="modal-section-content">${agent.desc}</div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-title">Best For</div>
+                    <div class="modal-section-content">${agent.bestFor}</div>
+                </div>
+                
+                <div class="modal-section">
+                    <div class="modal-section-title">Tags</div>
+                    <div class="modal-tags">
+                        ${agent.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('modal').onclick = (e) => {
+            if (e.target.id === 'modal') closeModal();
+        };
+
+        init();
+    </script>
+</body>
+</html>
