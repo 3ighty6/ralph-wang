@@ -1,31 +1,17 @@
 {
   "name": "ralph-wang",
   "version": "1.0.0",
-  "description": "Permission-gated screen access agent. Captures Chrome tabs, extracts links, reports findings.",
+  "description": "Permission-gated screen access agent",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'Static frontend ready in ./public'",
-    "deploy": "gh-pages -d public"
+    "start": "node server.js"
   },
-  "keywords": [
-    "ai-agents",
-    "screen-capture",
-    "permission-gated",
-    "browser-automation",
-    "chrome-tabs"
-  ],
-  "author": "Your GitHub Handle",
+  "keywords": ["ai-agents", "screen-capture", "permission-gated"],
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "playwright": "^1.40.0",
-    "dotenv": "^16.3.1"
-  },
-  "devDependencies": {
-    "gh-pages": "^6.0.0"
+    "playwright": "^1.40.0"
   }
 }
